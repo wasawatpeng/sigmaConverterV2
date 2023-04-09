@@ -40,6 +40,9 @@ function App() {
     } else if (parsedTitle === " sigma2atk") {
       setTitle("Sigma to Attack");
       // console.log(3);
+    } else if (parsedTitle === " siem2siem") {
+      setTitle("SIEM to SIEM");
+      // console.log(3);
     } else {
       setTitle("Home");
     }
