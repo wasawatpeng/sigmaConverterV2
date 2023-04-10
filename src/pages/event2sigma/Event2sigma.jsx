@@ -76,21 +76,21 @@ const Event2sigma = () => {
       console.log(evtInput);
       console.log(ConvertData);
       let uuid = uuidv4();
-      // fetch("http://localhost:5000/api/EvtToSigma/" + uuid, ConvertData)
-      //   //.then(console.log(data))
-      //   .then((response) => response.json())
-      //   .then((data) => {
-      //     console.log(data.output);
-      //     setEvt2SigmaOutput(data.output);
-      //     setOpenLoading(false);
-      //     // document.getElementById('sigmaOutput').removeAttribute("disabled");
-      //     // document.getElementById('sigmaOutput').focus();
-      //   })
-      //   // .then(({data,response})=>{
-      //   // console.log(data)
-      //   //console.log(response)
-      //   // })
-      //   .catch((error) => console.log(error));
+      fetch("http://localhost:5000/api/EvtToSigma/" + uuid, ConvertData)
+        //.then(console.log(data))
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data.output);
+          setEvt2SigmaOutput(data.output);
+          setOpenLoading(false);
+          // document.getElementById('sigmaOutput').removeAttribute("disabled");
+          // document.getElementById('sigmaOutput').focus();
+        })
+        // .then(({data,response})=>{
+        // console.log(data)
+        //console.log(response)
+        // })
+        .catch((error) => console.log(error));
     }
   };
   const [OpenLoading, setOpenLoading] = React.useState(false);
