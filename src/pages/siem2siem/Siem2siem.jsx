@@ -9,29 +9,35 @@ import CardContent from "@mui/material/CardContent";
 import TextField from "@mui/material/TextField";
 import Divider from "@mui/material/Divider";
 import Select from "@mui/material/Select";
-// import { SelectChangeEvent } from '@mui/material/Select';
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import IconButton from "@mui/material/IconButton";
 import ArrowCircleRightRoundedIcon from "@mui/icons-material/ArrowCircleRightRounded";
-import { sigma2atkStyles } from "./styles";
+import { siem2siemStyles } from "./styles";
 import { v4 as uuidv4 } from "uuid";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 import ButtonIcon from "../../components/common/ButtonIcon/ButtonIcon";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
-import DownloadIcon from "@mui/icons-material/Download";
 
-const Sigma2atk = () => {
-  const refSigmaInput = useRef(null);
+
+const Siem2siem = () => {
   const [sigmaInput, setSigmaInput] = useState({
+    formatOut: "",
+    formatIn: "",
     sigmaData: "",
   });
   const handleSigmaInputChange = (event) => {
     setSigmaInput({ ...sigmaInput, sigmaData: event.target.value });
+  };
+  const [formatOut, setFormatOut] = React.useState("");
+  const [formatIn, setFormatIn] = React.useState("");
+  const handleChangeSelect = (event) => {
+    setFormatOut(event.target.value);
+    setSigmaInput({ ...sigmaInput, formatOut: event.target.value });
   };
   const [convertOutput, setConvertOutput] = useState("");
   const convertSigmaClick = () => {
@@ -47,7 +53,7 @@ const Sigma2atk = () => {
     };
     let uuid = uuidv4();
     console.log(sigmaInput);
-    fetch("http://localhost:5000/api/sigma2atk/" + uuid, ConvertData)
+    fetch("http://localhost:5000/api/sigmaConverter/" + uuid, ConvertData)
       //.then(console.log(data))
       .then((response) => response.json())
       .then((data) => {
@@ -59,29 +65,8 @@ const Sigma2atk = () => {
       .catch((error) => console.log(error));
   };
   const [OpenLoading, setOpenLoading] = React.useState(false);
-  const fileInput = useRef();
-  const fileInputHandleClick = () => {
-    fileInput.current.click();
-  };
-  const handleFileChange = (event) => {
-    const file_obj = event.target.files && event.target.files[0];
-    if (!file_obj) {
-      return;
-    }
-    // console.log(file_read)
-    // console.log('fileObj is', file_obj);
-    // console.log(event.target.files);
-    // console.log(file_obj);
-    event.target.value = null;
-    let reader = new FileReader();
-    reader.onload = function (event) {
-      const readText = event.target.result;
-      refSigmaInput.current.value = readText;
-      // console.log(refSigmaInput)
-      setSigmaInput({ ...sigmaInput, sigmaData: readText });
-    };
-    reader.readAsText(file_obj);
-    event.target.value = null;
+  const copyClickFunc = () => {
+    navigator.clipboard.writeText(convertOutput);
   };
 
   return (
@@ -109,9 +94,9 @@ const Sigma2atk = () => {
           container
           alignItems="center"
           justify="center"
-          sx={sigma2atkStyles.gridCenter}
+          sx={siem2siemStyles.gridCenter}
         >
-          <Box sx={sigma2atkStyles.TitleBox}>
+          <Box sx={siem2siemStyles.TitleBox}>
             <Grid container sx={{ width: "100%" }}>
               <Grid width="50%">
                 <Grid sx={{ textAlign: "center" }}>
@@ -122,9 +107,7 @@ const Sigma2atk = () => {
             ></Divider> */}
               <Grid width="50%">
                 <Grid sx={{ textAlign: "center" }}>
-                  <h3 style={{ color: "black", fontWeight: "800" }}>
-                    MITRE ATT&CK®
-                  </h3>
+                  <h3 style={{ color: "black", fontWeight: "800" }}>SIEM</h3>
                 </Grid>
               </Grid>
               <Box width="100%">
@@ -133,7 +116,7 @@ const Sigma2atk = () => {
                   sx={{ bgcolor: "#a3a3a3" }}
                 ></Divider>
               </Box>
-              <Grid width="625px" sx={sigma2atkStyles.gridContentLeft}>
+              <Grid width="625px" sx={siem2siemStyles.gridContentLeft}>
                 <Box
                   sx={{
                     padding: "10px 0 20px 0",
@@ -142,28 +125,40 @@ const Sigma2atk = () => {
                     maxWidth: "100%",
                   }}
                 >
+                  <Box sx={{ maxWidth: 200, paddingTop: "10px" }}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel id="formatIn-label">SIEM</InputLabel>
+                      <Select
+                        labelId="event-label"
+                        id="event"
+                        value={formatIn}
+                        label="formatIn"
+                        defaultValue="none"
+                        onChange={handleChangeSelect}
+                        // variant="standard"
+                      >
+                        <MenuItem value="IBM Qradar">IBM Qradar</MenuItem>
+                        <MenuItem value="Splunk">Splunk</MenuItem>
+                        <MenuItem value="Elastic">Elastic</MenuItem>
+                        <MenuItem value="LogRhythm">LogRhythm</MenuItem>
+                        <MenuItem value="Sumo Logic">Sumo Logic</MenuItem>
+                        {/* <MenuItem value={20}>Twenty</MenuItem>
+                            <MenuItem value={30}>Thirty</MenuItem> */}
+                      </Select>
+                    </FormControl>
+                  </Box>
                   <Box style={{ position: "relative" }}>
                     <TextField
-                      inputRef={refSigmaInput}
                       onChange={handleSigmaInputChange}
                       id="sigmaruleInput"
                       placeholder="Place Sigma rule here"
                       fullWidth
                       multiline
-                      rows={24}
+                      rows={23}
                       sx={{ marginTop: "16px", marginBottom: 0 }}
-                      inputProps={{
-                        style: {
-                          marginBottom: "23px",
-                        },
-                      }}
                     />
                     <ButtonIcon
                       icon={<UploadFileOutlinedIcon></UploadFileOutlinedIcon>}
-                      isFileInput={true}
-                      fileChangeFunction={handleFileChange}
-                      refInput={fileInput}
-                      onClickFunc={fileInputHandleClick}
                     ></ButtonIcon>
                   </Box>
                 </Box>
@@ -171,7 +166,7 @@ const Sigma2atk = () => {
               <Divider
                 orientation="vertical"
                 flexItem
-                sx={sigma2atkStyles.verDivider}
+                sx={siem2siemStyles.verDivider}
               >
                 <IconButton
                   onClick={convertSigmaClick}
@@ -185,7 +180,7 @@ const Sigma2atk = () => {
                   ></ArrowCircleRightRoundedIcon>
                 </IconButton>
               </Divider>
-              <Grid xs sx={sigma2atkStyles.gridContentRight}>
+              <Grid xs sx={siem2siemStyles.gridContentRight}>
                 <Box
                   sx={{
                     padding: "10px 0 20px 0",
@@ -194,44 +189,42 @@ const Sigma2atk = () => {
                     maxWidth: "100%",
                   }}
                 >
+                  <Box sx={{ maxWidth: 200, paddingTop: "10px" }}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel id="formatOut-label">SIEM</InputLabel>
+                      <Select
+                        labelId="event-label"
+                        id="event"
+                        value={formatOut}
+                        label="formatOut"
+                        defaultValue="none"
+                        onChange={handleChangeSelect}
+                        // variant="standard"
+                      >
+                        <MenuItem value="IBM Qradar">IBM Qradar</MenuItem>
+                        <MenuItem value="Splunk">Splunk</MenuItem>
+                        <MenuItem value="Elastic">Elastic</MenuItem>
+                        <MenuItem value="LogRhythm">LogRhythm</MenuItem>
+                        <MenuItem value="Sumo Logic">Sumo Logic</MenuItem>
+                        {/* <MenuItem value={20}>Twenty</MenuItem>
+                          <MenuItem value={30}>Thirty</MenuItem> */}
+                      </Select>
+                    </FormControl>
+                  </Box>
                   <Box style={{ position: "relative" }}>
                     <TextField
                       id="siemOutput"
                       value={convertOutput}
-                      placeholder="Click convert button to get MITRE ATT&CK "
+                      placeholder="Click convert button to get SIEM rule"
                       fullWidth
                       multiline
-                      rows={24}
-                      sx={{ marginTop: "16px", marginBottom: 0 }}
-                      inputProps={{
-                        style: {
-                          marginBottom: "23px",
-                        },
-                      }}
+                      rows={23}
+                      sx={{ marginTop: "12px", marginBottom: 0 }}
                     />
-                    <Box
-                      sx={{
-                        width: "100%",
-                        position: "absolute",
-                        textAlign: "end",
-                        bottom: "0",
-                      }}
-                    >
-                    <IconButton
-                        size="small"
-                        style={{ color: "a3a3a3" }}
-                        sx={{ bgcolor: "transparent", border: 0 }}
-                      >
-                        <DownloadIcon></DownloadIcon>
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        style={{ color: "a3a3a3" }}
-                        sx={{ bgcolor: "transparent", border: 0 }}
-                      >
-                        <ContentCopyIcon></ContentCopyIcon>
-                      </IconButton>
-                    </Box>
+                    <ButtonIcon
+                      icon={<ContentCopyIcon></ContentCopyIcon>}
+                      onClickFunc={copyClickFunc}
+                    ></ButtonIcon>
                   </Box>
                 </Box>
               </Grid>
@@ -244,4 +237,4 @@ const Sigma2atk = () => {
   );
 };
 
-export default Sigma2atk;
+export default Siem2siem;

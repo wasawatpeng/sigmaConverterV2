@@ -11,7 +11,7 @@ import {
 import Event2sigma from './pages/event2sigma/Event2sigma';
 import Sigma2atk from './pages/sigma2atk/Sigma2atk';
 import Sigma2siem from './pages/sigma2siem/Sigma2siem';
-import Siem2siem from './pages/siem2siem/siem2siem';
+import Siem2siem from './pages/siem2siem/Siem2siem';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -20,7 +20,6 @@ const router = createBrowserRouter(
       <Route path="sigma2atk" element={<Sigma2atk />} />
       <Route path="sigma2siem" element={<Sigma2siem />} />
       <Route path="siem2siem" element={<Siem2siem/>}/>
-      {/* ... etc. */}
     </Route>
   )
 );
