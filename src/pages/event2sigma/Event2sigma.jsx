@@ -22,14 +22,16 @@ import { v4 as uuidv4 } from "uuid";
 import { useState } from "react";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ButtonIcon from "../../components/common/ButtonIcon/ButtonIcon";
 import { useCallback } from "react";
-import {useRef,useEffect} from "react";
-
+import { useRef, useEffect } from "react";
+import { Alert, AlertTitle } from "@mui/material";
+import MyAlert from "../../components/common/MyAlert/MyAlert";
+import Snackbar from '@mui/material/Snackbar';
 
 const Event2sigma = () => {
-  const refEvtInput = useRef(null)
+  const refEvtInput = useRef(null);
   const [evtInput, setEvtInput] = useState({
     title: "",
     author: "",
@@ -55,18 +57,28 @@ const Event2sigma = () => {
     // console.log(event.target.value)
     // console.log(evtInput)
   };
-  const refOutput = useRef(null) 
+  const refOutput = useRef(null);
   const [Evt2SigmaOutput, setEvt2SigmaOutput] = useState("");
-  const Evt2SigmaOutputHandle = (e) =>{
-    setEvt2SigmaOutput(e.target.value)
-  }
+  const Evt2SigmaOutputHandle = (e) => {
+    setEvt2SigmaOutput(e.target.value);
+  };
   const convertEvtClick = () => {
     // console.log(refEvtInput.current.value)
-    if(evtInput.format == ""){
-      console.log("Please select format")
-    }
-    else {
-      console.log(evtInput.evtData)
+    if (evtInput.format == "") {
+      // console.log("Please select format");
+      setOpenError_NoFormat(true)
+      setTimeout(function() {
+        setOpenError_NoFormat(false)
+     }, 2000)
+    } else if (evtInput.evtData == "") {
+      // console.log("Please input event log");
+      setOpenError_NoLog(true)
+      setTimeout(function() {
+        setOpenError_NoLog(false)
+     }, 2000)
+    } else {
+      setOpenLoading(true);
+      console.log(evtInput.evtData);
       let ConvertData = {
         method: "POST",
         headers: {
@@ -84,9 +96,18 @@ const Event2sigma = () => {
         .then((response) => response.json())
         .then((data) => {
           console.log(data.output);
-          refOutput.current.value = data.output
-          setEvt2SigmaOutput(data.output);
-          setOpenLoading(false);
+          if(data.output == "error:wrong_format"){
+            setOpenLoading(false);
+            setOpenError_WrongFormat(true)
+            setTimeout(function() {
+              setOpenError_WrongFormat(false)
+            }, 2000)
+          }
+          else {
+            refOutput.current.value = data.output;
+            setEvt2SigmaOutput(data.output);
+            setOpenLoading(false);
+          }
           // document.getElementById('sigmaOutput').removeAttribute("disabled");
           // document.getElementById('sigmaOutput').focus();
         })
@@ -97,18 +118,18 @@ const Event2sigma = () => {
         .catch((error) => console.log(error));
     }
   };
-  const [OpenLoading, setOpenLoading] = React.useState(false);
-  // const handleCloseLoading = () => {
-  //   setOpenLoading(false);
-  // };
+  const [OpenLoading, setOpenLoading] = useState(false);
+  const handleCloseLoading = () => {
+    setOpenLoading(false);
+  };
   const fileInput = useRef();
-  const fileInputHandleClick = () =>{
-    fileInput.current.click()
-  }
-  const handleFileChange = (event) =>{
-    const file_obj = event.target.files && event.target.files[0]
-    if (!file_obj){
-        return
+  const fileInputHandleClick = () => {
+    fileInput.current.click();
+  };
+  const handleFileChange = (event) => {
+    const file_obj = event.target.files && event.target.files[0];
+    if (!file_obj) {
+      return;
     }
     // console.log(file_read)
     // console.log('fileObj is', file_obj);
@@ -116,25 +137,47 @@ const Event2sigma = () => {
     // console.log(file_obj);
     event.target.value = null;
     let reader = new FileReader();
-    reader.onload = function(event) {
-        const readText = event.target.result
-        refEvtInput.current.value=readText
-        // console.log(refEvtInput)
-        setEvtInput({...evtInput, evtData: readText})
+    reader.onload = function (event) {
+      const readText = event.target.result;
+      refEvtInput.current.value = readText;
+      // console.log(refEvtInput)
+      setEvtInput({ ...evtInput, evtData: readText });
     };
-    reader.readAsText(file_obj)
-    event.target.value = null
-  }
-  const copyClickFunc = () =>{
-    navigator.clipboard.writeText(Evt2SigmaOutput)
-  }
+    reader.readAsText(file_obj);
+    event.target.value = null;
+  };
+  const copyClickFunc = () => {
+    navigator.clipboard.writeText(Evt2SigmaOutput);
+  };
+  const [OpenError_NoLog, setOpenError_NoLog] = useState(false);
+  const [OpenError_NoFormat, setOpenError_NoFormat] = useState(false);
+  const [OpenError_WrongFormat, setOpenError_WrongFormat] = useState(false);
+
   return (
     <div>
       <Backdrop
-        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        sx={{paddingTop:"150px",paddingLeft:"350px", color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={OpenLoading}
       >
         <CircularProgress color="inherit" />
+      </Backdrop>
+      <Backdrop
+        sx={{ paddingTop:"150px",paddingLeft:"350px",color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={OpenError_NoLog}
+      >
+        <MyAlert text="Please enter event log"/>
+      </Backdrop>
+      <Backdrop
+        sx={{ paddingTop:"150px",paddingLeft:"350px",color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={OpenError_NoFormat}
+      >
+        <MyAlert text="Please select event format"/>
+      </Backdrop>
+      <Backdrop
+        sx={{ paddingTop:"150px",paddingLeft:"350px",color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={OpenError_WrongFormat}
+      >
+        <MyAlert text="Wrong format, check your format again"/>
       </Backdrop>
       <Grid
         maxWidth="1300px"
@@ -228,10 +271,9 @@ const Event2sigma = () => {
                         onChange={handleChangeSelect}
                         // variant="standard"
                       >
-                        {/* <MenuItem value="XML">XML</MenuItem> */}
-                        <MenuItem value="YAML">YAML</MenuItem>
-                        {/* <MenuItem value={20}>Twenty</MenuItem>
-                          <MenuItem value={30}>Thirty</MenuItem> */}
+                        <MenuItem value="XML">XML</MenuItem>
+                        <MenuItem value="Text">Text</MenuItem>
+                        {/* <MenuItem value="YAML">YAML</MenuItem> */}
                       </Select>
                     </FormControl>
                   </Box>
@@ -248,21 +290,21 @@ const Event2sigma = () => {
                       fullWidth
                       multiline
                       rows={12}
-                      sx={{ marginBottom: 0, marginTop: "10px", }}
+                      sx={{ marginBottom: 0, marginTop: "10px" }}
                       inputProps={{
                         style: {
                           marginBottom: "23px",
                         },
                       }}
                     />
-                    <ButtonIcon 
+                    <ButtonIcon
                       icon={<UploadFileOutlinedIcon></UploadFileOutlinedIcon>}
                       isFileInput={true}
                       fileChangeFunction={handleFileChange}
                       refInput={fileInput}
                       onClickFunc={fileInputHandleClick}
-                    >
-                    </ButtonIcon>
+                      hoverText="Import file"
+                    ></ButtonIcon>
                   </Box>
                 </Box>
               </Grid>
@@ -292,30 +334,28 @@ const Event2sigma = () => {
                     maxWidth: "100%",
                   }}
                 >
-                <Box
-                  style={{ position: "relative" }}
-                >
-                  <TextField
-                    id="sigmaOutput"
-                    inputRef={refOutput}
-                    onChange={Evt2SigmaOutputHandle}
-                    placeholder="Click convert button to get Sigma rule"
-                    fullWidth
-                    multiline
-                    rows={24}
-                    sx={{ marginTop: "16px", marginBottom: 0 }}
-                    inputProps={{
-                      style: {
-                        marginBottom: "23px",
-                      },
-                    }}
-                  />
-                  <ButtonIcon 
-                    icon={<ContentCopyIcon></ContentCopyIcon>}
-                    onClickFunc={copyClickFunc}
-                  >
-                  </ButtonIcon>
-                </Box>
+                  <Box style={{ position: "relative" }}>
+                    <TextField
+                      id="sigmaOutput"
+                      inputRef={refOutput}
+                      onChange={Evt2SigmaOutputHandle}
+                      placeholder="Click convert button to get Sigma rule"
+                      fullWidth
+                      multiline
+                      rows={24}
+                      sx={{ marginTop: "16px", marginBottom: 0 }}
+                      inputProps={{
+                        style: {
+                          marginBottom: "23px",
+                        },
+                      }}
+                    />
+                    <ButtonIcon
+                      icon={<ContentCopyIcon></ContentCopyIcon>}
+                      onClickFunc={copyClickFunc}
+                      hoverText="Copy text"
+                    ></ButtonIcon>
+                  </Box>
                 </Box>
               </Grid>
             </Grid>

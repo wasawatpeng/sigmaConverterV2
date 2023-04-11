@@ -39,7 +39,7 @@ const Navbar = () => {
             height="56"
             style={{ paddingRight: "10px" }}
           />
-          SIGMA CONVERTGER
+          SIGMA CONVERTER
         </Toolbar>
         <Divider sx={{ bgcolor: "#ebebeb" }}></Divider>
           <List disablePadding sx={{ color: "#fff" }}>
@@ -76,7 +76,13 @@ const Navbar = () => {
               <ListItem 
                 key={item.id} 
                 disablePadding
-                onClick={()=>navigate(item.route)}
+                onClick={()=>{
+                    if(item.route=="download")
+                      window.open('https://drive.google.com/file/d/19VG2-X1EsPVsb-i9PPbNqRCJ-e2CY6mA/view','_blank', 'noopener,noreferrer')
+                    else 
+                      navigate(item.route)
+                  }
+                }
               >
                 <ListItemButton 
                   

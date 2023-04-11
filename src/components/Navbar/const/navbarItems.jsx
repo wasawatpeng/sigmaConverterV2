@@ -1,3 +1,5 @@
+import DownloadIcon from '@mui/icons-material/Download';
+
 export const mainNavbarItems =[
     {
         id: 1,
@@ -11,16 +13,22 @@ export const mainNavbarItems =[
         label:'Sigma to SIEM',
         route:'sigma2siem',
     },
-    {
-        id: 3,
-        icon:'S2S',
-        label:'SIEM to SIEM',
-        route:'siem2siem',
-    },
+    // {
+    //     id: 3,
+    //     icon:'S2S',
+    //     label:'SIEM to SIEM',
+    //     route:'siem2siem',
+    // },
     {
         id: 4,
         icon:'S2A',
         label:'Sigma to Attack',
         route:'sigma2atk',
+    },
+    {
+        id: 5,
+        icon: <DownloadIcon/>,
+        label:'Download to local',
+        route:'download',
     }
 ]

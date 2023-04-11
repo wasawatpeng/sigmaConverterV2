@@ -24,6 +24,7 @@ import ButtonIcon from "../../components/common/ButtonIcon/ButtonIcon";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
 import { useEffect } from "react";
+import MyAlert from "../../components/common/MyAlert/MyAlert";
 
 const Sigma2siem = () => {
   const refSigmaInput = useRef(null)
@@ -47,7 +48,20 @@ const Sigma2siem = () => {
     // console.log(convertOutput)
   }
   const convertSigmaClick = () => {
-    setOpenLoading(!setOpenLoading)
+    if(sigmaInput.sigmaData == ""){
+      setOpenError_NoSigma(true)
+      setTimeout(function() {
+        setOpenError_NoSigma(false)
+     }, 2000)
+    }
+    else if(sigmaInput.format == ""){
+      setOpenError_NoFormat(true)
+      setTimeout(function() {
+        setOpenError_NoFormat(false)
+     }, 2000)
+    }
+    else{
+    setOpenLoading(true)
     let ConvertData = {
       method: "POST",
       headers: {
@@ -70,6 +84,7 @@ const Sigma2siem = () => {
         // document.getElementById('sigmaConvertOutput').removeAttribute("disabled");
       })
       .catch((error) => console.log(error));
+    }
   };
   const [OpenLoading, setOpenLoading] = React.useState(false);
   const fileInput = useRef();
@@ -101,13 +116,28 @@ const Sigma2siem = () => {
     navigator.clipboard.writeText(convertOutput)
   }
 
+  const [OpenError_NoSigma, setOpenError_NoSigma] = React.useState(false);
+  const [OpenError_NoFormat, setOpenError_NoFormat] = React.useState(false);
+
   return (
     <div>
       <Backdrop
-        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        sx={{ paddingTop:"150px",paddingLeft:"350px",color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={OpenLoading}
       >
         <CircularProgress color="inherit" />
+      </Backdrop>
+      <Backdrop
+        sx={{ paddingTop:"150px",paddingLeft:"350px",color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={OpenError_NoFormat}
+      >
+        <MyAlert text="Please select SIEM output format"/>
+      </Backdrop>
+      <Backdrop
+        sx={{ paddingTop:"150px",paddingLeft:"350px",color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={OpenError_NoSigma}
+      >
+        <MyAlert text="Please enter Sigma rule"/>
       </Backdrop>
       <Grid
         maxWidth="1300px"
@@ -181,6 +211,7 @@ const Sigma2siem = () => {
                     fileChangeFunction={handleFileChange}
                     refInput={fileInput}
                     onClickFunc={fileInputHandleClick}
+                    hoverText="Import file"
                   >
                   </ButtonIcon>
                   </Box>
@@ -250,7 +281,7 @@ const Sigma2siem = () => {
                         },
                       }}
                     />
-                    <ButtonIcon icon={<ContentCopyIcon></ContentCopyIcon>} onClickFunc={copyClickFunc}></ButtonIcon>
+                    <ButtonIcon icon={<ContentCopyIcon></ContentCopyIcon>} onClickFunc={copyClickFunc} hoverText="Copy text"></ButtonIcon>
                   </Box>
                 </Box>
               </Grid>

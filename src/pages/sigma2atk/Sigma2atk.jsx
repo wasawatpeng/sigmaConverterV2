@@ -24,6 +24,9 @@ import ButtonIcon from "../../components/common/ButtonIcon/ButtonIcon";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
 import DownloadIcon from "@mui/icons-material/Download";
+import MyAlert from "../../components/common/MyAlert/MyAlert";
+import Tooltip from "@mui/material/Tooltip";
+import LaunchIcon from '@mui/icons-material/Launch';
 
 const Sigma2atk = () => {
   const refSigmaInput = useRef(null);
@@ -33,35 +36,42 @@ const Sigma2atk = () => {
   const handleSigmaInputChange = (event) => {
     setSigmaInput({ ...sigmaInput, sigmaData: event.target.value });
   };
-  const refOutput = useRef(null)
+  const refOutput = useRef(null);
   const [convertOutput, setConvertOutput] = useState("");
-  const convertOutputHandleChange = (event) =>{
+  const convertOutputHandleChange = (event) => {
     setConvertOutput(event.target.value);
-  }
+  };
   const convertSigmaClick = () => {
-    setOpenLoading(!setOpenLoading);
-    let ConvertData = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        content: sigmaInput,
-      }),
-    };
-    let uuid = uuidv4();
-    console.log(sigmaInput);
-    fetch("http://localhost:5000/api/sigma2atk/" + uuid, ConvertData)
-      //.then(console.log(data))
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data.output);
-        refOutput.current.value = data.output
-        setConvertOutput(data.output);
-        setOpenLoading(false);
-        // document.getElementById('sigmaConvertOutput').removeAttribute("disabled");
-      })
-      .catch((error) => console.log(error));
+    if (sigmaInput.sigmaData == "") {
+      setOpenError_NoSigma(true);
+      setTimeout(function () {
+        setOpenError_NoSigma(false);
+      }, 2000);
+    } else {
+      setOpenLoading(true);
+      let ConvertData = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: sigmaInput,
+        }),
+      };
+      let uuid = uuidv4();
+      console.log(sigmaInput);
+      fetch("http://localhost:5000/api/sigma2atk/" + uuid, ConvertData)
+        //.then(console.log(data))
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data.output);
+          refOutput.current.value = data.output;
+          setConvertOutput(data.output);
+          setOpenLoading(false);
+          // document.getElementById('sigmaConvertOutput').removeAttribute("disabled");
+        })
+        .catch((error) => console.log(error));
+    }
   };
   const [OpenLoading, setOpenLoading] = React.useState(false);
   const fileInput = useRef();
@@ -93,24 +103,46 @@ const Sigma2atk = () => {
     navigator.clipboard.writeText(convertOutput);
   };
 
-  const downloadFile = () =>{
-    const link = document.createElement('a')
-    const file = new Blob([convertOutput],{
-      type:"text/plain;charset=utf-8"
-    })
-    link.href = URL.createObjectURL(file)
-    link.download = "mitre_import.json"
+  const downloadFile = () => {
+    const link = document.createElement("a");
+    const file = new Blob([convertOutput], {
+      type: "text/plain;charset=utf-8",
+    });
+    link.href = URL.createObjectURL(file);
+    link.download = "mitre_import.json";
     // document.body.appendChild(link)
-    link.click()
+    link.click();
+  };
+
+  const toMITRE = () =>{
+    window.open("https://mitre-attack.github.io/attack-navigator/", '_blank', 'noreferrer');
   }
+
+  const [OpenError_NoSigma, setOpenError_NoSigma] = React.useState(false);
 
   return (
     <div>
       <Backdrop
-        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        sx={{
+          paddingTop: "150px",
+          paddingLeft: "350px",
+          color: "#fff",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+        }}
         open={OpenLoading}
       >
         <CircularProgress color="inherit" />
+      </Backdrop>
+      <Backdrop
+        sx={{
+          paddingTop: "150px",
+          paddingLeft: "350px",
+          color: "#fff",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+        }}
+        open={OpenError_NoSigma}
+      >
+        <MyAlert text="Please enter Sigma rules" />
       </Backdrop>
       <Grid
         maxWidth="1300px"
@@ -184,6 +216,7 @@ const Sigma2atk = () => {
                       fileChangeFunction={handleFileChange}
                       refInput={fileInput}
                       onClickFunc={fileInputHandleClick}
+                      hoverText="Import file"
                     ></ButtonIcon>
                   </Box>
                 </Box>
@@ -238,22 +271,38 @@ const Sigma2atk = () => {
                         bottom: "0",
                       }}
                     >
-                    <IconButton
-                        size="small"
-                        style={{ color: "a3a3a3" }}
-                        sx={{ bgcolor: "transparent", border: 0 }}
-                        onClick={downloadFile}
-                      >
-                        <DownloadIcon></DownloadIcon>
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        style={{ color: "a3a3a3" }}
-                        sx={{ bgcolor: "transparent", border: 0 }}
-                        onClick={copyClickFunc}
-                      >
-                        <ContentCopyIcon></ContentCopyIcon>
-                      </IconButton>
+                      <Tooltip title="Copy text" placement="top">
+                        <IconButton
+                          size="small"
+                          style={{ color: "a3a3a3" }}
+                          sx={{ bgcolor: "transparent", border: 0 }}
+                          onClick={copyClickFunc}
+                        >
+                          <ContentCopyIcon></ContentCopyIcon>
+                        </IconButton>
+                      </Tooltip>
+                      
+                      <Tooltip title="Download" placement="top">
+                        <IconButton
+                          size="small"
+                          style={{ color: "a3a3a3" }}
+                          sx={{ bgcolor: "transparent", border: 0 }}
+                          onClick={downloadFile}
+                        >
+                          <DownloadIcon></DownloadIcon>
+                        </IconButton>
+                      </Tooltip>
+                      
+                      <Tooltip title="Go to MITRE" placement="top">
+                        <IconButton
+                          size="small"
+                          style={{ color: "a3a3a3" }}
+                          sx={{ bgcolor: "transparent", border: 0 }}
+                          onClick={toMITRE}
+                        >
+                          <LaunchIcon></LaunchIcon>
+                        </IconButton>
+                      </Tooltip>
                     </Box>
                   </Box>
                 </Box>

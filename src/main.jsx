@@ -6,21 +6,25 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
   Route,
+  Navigate,
+  useNavigate,
   RouterProvider,
 } from "react-router-dom";
 import Event2sigma from './pages/event2sigma/Event2sigma';
 import Sigma2atk from './pages/sigma2atk/Sigma2atk';
 import Sigma2siem from './pages/sigma2siem/Sigma2siem';
 import Siem2siem from './pages/siem2siem/Siem2siem';
+import { render } from "react-dom";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path="/" element={<App />}>
-      <Route path="event2sigma" element={<Event2sigma />} />
-      <Route path="sigma2atk" element={<Sigma2atk />} />
-      <Route path="sigma2siem" element={<Sigma2siem />} />
-      <Route path="siem2siem" element={<Siem2siem/>}/>
-    </Route>
+      <Route element={<App/>}>
+        <Route path="event2sigma" element={<Event2sigma />} />
+        <Route path="sigma2atk" element={<Sigma2atk />} />
+        <Route path="sigma2siem" element={<Sigma2siem />} />
+        {/* <Route path="download" element={<Siem2siem/>}/> */}
+        <Route path='*' element={<Navigate to='event2sigma' />} />
+      </Route>
   )
 );
 
