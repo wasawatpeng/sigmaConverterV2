@@ -23,6 +23,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import ButtonIcon from "../../components/common/ButtonIcon/ButtonIcon";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
+import { useEffect } from "react";
 
 const Sigma2siem = () => {
   const refSigmaInput = useRef(null)
@@ -38,7 +39,13 @@ const Sigma2siem = () => {
     setFormat(event.target.value);
     setSigmaInput({ ...sigmaInput, format: event.target.value });
   };
+  const refOutput = useRef(null) 
   const [convertOutput, setConvertOutput] = useState("");
+  const convertOutputHandleChange = (event) =>{
+    // console.log(event.target.value)
+    setConvertOutput(event.target.value);
+    // console.log(convertOutput)
+  }
   const convertSigmaClick = () => {
     setOpenLoading(!setOpenLoading)
     let ConvertData = {
@@ -57,6 +64,7 @@ const Sigma2siem = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log(data.output);
+        refOutput.current.value = data.output
         setConvertOutput(data.output);
         setOpenLoading(false)
         // document.getElementById('sigmaConvertOutput').removeAttribute("disabled");
@@ -87,6 +95,10 @@ const Sigma2siem = () => {
     };
     reader.readAsText(file_obj)
     event.target.value = null
+  }
+  
+  const copyClickFunc = () =>{
+    navigator.clipboard.writeText(convertOutput)
   }
 
   return (
@@ -225,7 +237,8 @@ const Sigma2siem = () => {
                   <Box style={{position:"relative"}}>
                     <TextField
                       id="siemOutput"
-                      value={convertOutput}
+                      inputRef={refOutput}
+                      onChange={convertOutputHandleChange}
                       placeholder="Click convert button to get SIEM rule"
                       fullWidth
                       multiline
@@ -237,7 +250,7 @@ const Sigma2siem = () => {
                         },
                       }}
                     />
-                    <ButtonIcon icon={<ContentCopyIcon></ContentCopyIcon>}></ButtonIcon>
+                    <ButtonIcon icon={<ContentCopyIcon></ContentCopyIcon>} onClickFunc={copyClickFunc}></ButtonIcon>
                   </Box>
                 </Box>
               </Grid>

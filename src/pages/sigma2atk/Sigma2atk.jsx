@@ -33,7 +33,11 @@ const Sigma2atk = () => {
   const handleSigmaInputChange = (event) => {
     setSigmaInput({ ...sigmaInput, sigmaData: event.target.value });
   };
+  const refOutput = useRef(null)
   const [convertOutput, setConvertOutput] = useState("");
+  const convertOutputHandleChange = (event) =>{
+    setConvertOutput(event.target.value);
+  }
   const convertSigmaClick = () => {
     setOpenLoading(!setOpenLoading);
     let ConvertData = {
@@ -52,6 +56,7 @@ const Sigma2atk = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log(data.output);
+        refOutput.current.value = data.output
         setConvertOutput(data.output);
         setOpenLoading(false);
         // document.getElementById('sigmaConvertOutput').removeAttribute("disabled");
@@ -83,6 +88,21 @@ const Sigma2atk = () => {
     reader.readAsText(file_obj);
     event.target.value = null;
   };
+
+  const copyClickFunc = () => {
+    navigator.clipboard.writeText(convertOutput);
+  };
+
+  const downloadFile = () =>{
+    const link = document.createElement('a')
+    const file = new Blob([convertOutput],{
+      type:"text/plain;charset=utf-8"
+    })
+    link.href = URL.createObjectURL(file)
+    link.download = "mitre_import.json"
+    // document.body.appendChild(link)
+    link.click()
+  }
 
   return (
     <div>
@@ -197,7 +217,8 @@ const Sigma2atk = () => {
                   <Box style={{ position: "relative" }}>
                     <TextField
                       id="siemOutput"
-                      value={convertOutput}
+                      inputRef={refOutput}
+                      onChange={convertOutputHandleChange}
                       placeholder="Click convert button to get MITRE ATT&CK "
                       fullWidth
                       multiline
@@ -221,6 +242,7 @@ const Sigma2atk = () => {
                         size="small"
                         style={{ color: "a3a3a3" }}
                         sx={{ bgcolor: "transparent", border: 0 }}
+                        onClick={downloadFile}
                       >
                         <DownloadIcon></DownloadIcon>
                       </IconButton>
@@ -228,6 +250,7 @@ const Sigma2atk = () => {
                         size="small"
                         style={{ color: "a3a3a3" }}
                         sx={{ bgcolor: "transparent", border: 0 }}
+                        onClick={copyClickFunc}
                       >
                         <ContentCopyIcon></ContentCopyIcon>
                       </IconButton>

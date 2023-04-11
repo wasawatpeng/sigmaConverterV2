@@ -55,8 +55,11 @@ const Event2sigma = () => {
     // console.log(event.target.value)
     // console.log(evtInput)
   };
+  const refOutput = useRef(null) 
   const [Evt2SigmaOutput, setEvt2SigmaOutput] = useState("");
-
+  const Evt2SigmaOutputHandle = (e) =>{
+    setEvt2SigmaOutput(e.target.value)
+  }
   const convertEvtClick = () => {
     // console.log(refEvtInput.current.value)
     if(evtInput.format == ""){
@@ -81,6 +84,7 @@ const Event2sigma = () => {
         .then((response) => response.json())
         .then((data) => {
           console.log(data.output);
+          refOutput.current.value = data.output
           setEvt2SigmaOutput(data.output);
           setOpenLoading(false);
           // document.getElementById('sigmaOutput').removeAttribute("disabled");
@@ -293,7 +297,8 @@ const Event2sigma = () => {
                 >
                   <TextField
                     id="sigmaOutput"
-                    value={Evt2SigmaOutput}
+                    inputRef={refOutput}
+                    onChange={Evt2SigmaOutputHandle}
                     placeholder="Click convert button to get Sigma rule"
                     fullWidth
                     multiline

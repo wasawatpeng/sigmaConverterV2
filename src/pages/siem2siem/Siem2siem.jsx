@@ -22,9 +22,10 @@ import CircularProgress from "@mui/material/CircularProgress";
 import ButtonIcon from "../../components/common/ButtonIcon/ButtonIcon";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
-
+import { useRef } from "react";
 
 const Siem2siem = () => {
+  const refSigmaInput = useRef(null);
   const [sigmaInput, setSigmaInput] = useState({
     formatOut: "",
     formatIn: "",
@@ -39,7 +40,11 @@ const Siem2siem = () => {
     setFormatOut(event.target.value);
     setSigmaInput({ ...sigmaInput, formatOut: event.target.value });
   };
+  const refOutput = useRef(null)
   const [convertOutput, setConvertOutput] = useState("");
+  const convertOutputHandleChange = (event) =>{
+    setConvertOutput(event.target.value);
+  }
   const convertSigmaClick = () => {
     setOpenLoading(!setOpenLoading);
     let ConvertData = {
@@ -58,6 +63,7 @@ const Siem2siem = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log(data.output);
+        refOutput.current.value = data.output
         setConvertOutput(data.output);
         setOpenLoading(false);
         // document.getElementById('sigmaConvertOutput').removeAttribute("disabled");
@@ -65,6 +71,30 @@ const Siem2siem = () => {
       .catch((error) => console.log(error));
   };
   const [OpenLoading, setOpenLoading] = React.useState(false);
+  const fileInput = useRef();
+  const fileInputHandleClick = () => {
+    fileInput.current.click();
+  };
+  const handleFileChange = (event) => {
+    const file_obj = event.target.files && event.target.files[0];
+    if (!file_obj) {
+      return;
+    }
+    // console.log(file_read)
+    // console.log('fileObj is', file_obj);
+    // console.log(event.target.files);
+    // console.log(file_obj);
+    event.target.value = null;
+    let reader = new FileReader();
+    reader.onload = function (event) {
+      const readText = event.target.result;
+      refSigmaInput.current.value = readText;
+      // console.log(refSigmaInput)
+      setSigmaInput({ ...sigmaInput, sigmaData: readText });
+    };
+    reader.readAsText(file_obj);
+    event.target.value = null;
+  };
   const copyClickFunc = () => {
     navigator.clipboard.writeText(convertOutput);
   };
@@ -149,6 +179,7 @@ const Siem2siem = () => {
                   </Box>
                   <Box style={{ position: "relative" }}>
                     <TextField
+                      inputRef={refSigmaInput}
                       onChange={handleSigmaInputChange}
                       id="sigmaruleInput"
                       placeholder="Place Sigma rule here"
@@ -159,6 +190,9 @@ const Siem2siem = () => {
                     />
                     <ButtonIcon
                       icon={<UploadFileOutlinedIcon></UploadFileOutlinedIcon>}
+                      fileChangeFunction={handleFileChange}
+                      refInput={fileInput}
+                      onClickFunc={fileInputHandleClick}
                     ></ButtonIcon>
                   </Box>
                 </Box>
@@ -214,7 +248,8 @@ const Siem2siem = () => {
                   <Box style={{ position: "relative" }}>
                     <TextField
                       id="siemOutput"
-                      value={convertOutput}
+                      inputRef={refOutput}
+                      onChange={convertOutputHandleChange}
                       placeholder="Click convert button to get SIEM rule"
                       fullWidth
                       multiline
